@@ -21,8 +21,8 @@ namespace vvision{
         VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
         std::vector<VkDynamicState> dynamicStateEnables;
         VkPipelineDynamicStateCreateInfo dynamicStateInfo;
-        VkPipelineLayout pipelineLayout = nullptr;
-        VkRenderPass renderPass = nullptr;
+        VkPipelineLayout pipelineLayout = (VkPipelineLayout)nullptr;
+        VkRenderPass renderPass = (VkRenderPass)nullptr;
         uint32_t subpass = 0;
         static void defaultInfo(PipelineConfigInfo &configInfo);
     };
@@ -32,7 +32,7 @@ namespace vvision{
         VkPipeline graphicsPipeline;
         VkShaderModule vertexShaderModule, fragmentShaderModule;
     public:
-        Pipeline(Device &device, const std::filesystem::path &shaderPath, const std::string &vertName, const std::string &fragName, const PipelineConfigInfo& configInfo);
+        Pipeline(Device &device, const std::filesystem::path &shaderPath, const std::string &vertName, const std::string &fragName, const PipelineConfigInfo& configInfo, std::vector<VkVertexInputBindingDescription> &bindingDescriptions,std::vector<VkVertexInputAttributeDescription> &attributeDescriptions);
         ~Pipeline();
 
         Pipeline(const Pipeline&) = delete;

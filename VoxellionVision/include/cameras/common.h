@@ -9,7 +9,7 @@
 
 namespace vvision{
     namespace cameras{
-        struct FirstPerson;
+        struct Camera;
         enum class ProjectionType: uint_fast8_t{
             PERSPECTIVE,
             ORTHOGRAPHIC
@@ -25,43 +25,49 @@ namespace vvision{
             OrthographicData o;
             PerspectiveData p;
         };
-        typedef void(keyCallback)(int key, int scancode, int action, int mods);
-        typedef void(mousePosCallback)(double xpos, double ypos);
+        namespace callbacks{
+            typedef void(frameBuffer)(int width, int height);
+            typedef void(key)(int key, int scancode, int action, int mods, double dt);
+            typedef void(mouseButton)(int button, int action, int mods, double dt);
+            typedef void(cursorPos)(double xpos, double ypos, double dt);
+            typedef void(scroll)(double xoffset, double yoffset, double dt);
+        }
         class CameraManager{
         public:
             enum class CameraType:uint_fast8_t{
                 NULL_CAMERA,
                 FIRST_PERSON
             };
-            struct CamID{
-                CameraType type;
-                uint_fast8_t index;
-            };
+            typedef uint16_t CamID;
+            static constexpr CamID NULL_CAMERA = UINT16_MAX;
         private:
             float aspect;
-            CamID primaryCamera;
-            std::vector<FirstPerson> firstPersonCameras;
+            CamID primaryCameraID;
+            Camera* primaryCamera;
+            std::vector<Camera*> cameras;
         public:
             CameraManager(float aspect);
 
-            CamID addFirstPersonCamera(PerspectiveData p, glm::vec3 pos = {0,0,0}, glm::quat rot = glm::quat(glm::vec3(0,0,0)));
-            CamID addFirstPersonCamera(OrthographicData p, glm::vec3 pos = {0,0,0}, glm::quat rot = glm::quat(glm::vec3(0,0,0)));
+            CamID addCamera(Camera *cam);
 
             void setPrimaryCamera(CamID id);
             CamID getPrimaryCameraId();
-            void* getCamera(CamID id);
+            Camera *getCamera(CamID id);
+            Camera *getPrimaryCamera();
+            inline bool isCamIDValid(CamID id);
 
             glm::mat4 getPrimaryVPMat();
             glm::mat4 getPrimaryViewMat();
             glm::mat4 getPrimaryIViewMat();
+            float getAspect()const{return this->aspect;};
 
             void frameBufferResizeCallback(int width, int height);
-            void keyCallback(int key, int scancode, int action, int mods);
-            void mouseButtonCallback(int button, int action, int mods);
-            void cursorPositionCallback(double xpos, double ypos);
-            void scrollCallback(double xoffset, double yoffset);
+            void keyCallback(int key, int scancode, int action, int mods, double dt);
+            void mouseButtonCallback(int button, int action, int mods, double dt);
+            void cursorPositionCallback(double xpos, double ypos, double dt);
+            void scrollCallback(double xoffset, double yoffset, double dt);
         };
     }
 }
 
-#include <cameras/firstPerson.h>
+#include "cameras/base.h"

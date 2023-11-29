@@ -1,31 +1,23 @@
+VoxellionVision V0.0.0.a0.16
+
 To get started, import the "graphicsHandler.h" header file. All objects are in the "vvision" namespace.
 
-Create a std::filesystem::path that leads to the shader folder. This folder should have both the vertex and fragment shader, compiled into SPIR-V (.spv files). Then, instantiate a GraphicsHandler. The constructor takes 6 arguments:
-width - width of window in pixels
-height - height of window in pixels
-title - name of window
-shaderPath - path that was created earlier
-vertexName - name of the vertex shader file
-fragmentName - name of the fragment shader file
+First, instantiate a GraphicsHandler(uint32_t width, uint32_t height, std::string title), where width and height are the window dimentions and the title is the name of the window. It may be useful to make a reference to the window and camera manager (GraphicsHandler::window and GraphicsHandler::CameraManager), since you will probably access them a lot.
 
-Note: eventually, the shaders will be moved to renderSystems. When that happens, the shaders will be added in a seperate step.
+Next, use GraphicsHandler::addModel(V *vertices, uint32_t vertexCount, uint32_t *indices, uint32_t indexCount) to add a model to the graphics handler, where V is any type in the vvision::model::vertex namespace. Make sure to keep the pointer to the model that is returned, you need it to modify the model.
 
-Next, to add models, use GraphicsHandler::addModel(vertices). The vertices are an std::vector of Model::Vertex. The Model::Vertex includes two glm::vec3, the first one being position and the second one being color. Make sure to keep the pointer that was returned by this function, since you need it to make the renderable (this is useful for reusing models).
+Then, add a renderSystem with GraphicsHandler::addRenderSystem<\T>(std::filesystem::path shaderPath, std::string vertexName, std::string fragmentName, vvision::model::vertex::VertexType vertexType), which needs a path to the shader files, the name of the shaders (including the .spv extension), and the type of vertex. Note that only models with the same vertex type can be added to a render system. As with the model, make sure to keep a pointer to the render system that is returned, you need it to add renderables. To add a renderable, use RenderSystem::addRenderable(vvision::model::Model *model, glm::vec3 pos, glm::quat rot, glm::vec3 scale). Again, keep the pointer that is returned, since you need it to transform the renderable.
 
-Create a renderable using GraphicsHandler::addRenderable(Model*, glm::vec3 pos, glm::quat rot, glm::scale = {1.0f,1.0f,1.0f}). This renderable represents an object with a position, orientation, and scale. Again, make sure to keep the pointer returned by the addRenderable function, since you need it in order to move the object.
+A model represents a mesh on the GPU. Since different vertex types have different memory layouts, it needs to match the layout that the render system uses. A renderable contains extra data about how to render a model, including its transformation. This distinction is useful since multiple renderables can use the same model (ex. a few tree models can be drawn hundreds of times each in a forest).
 
-At this point, it may be useful to make a reference to the GraphicsHandler::window or the GraphicsHandler::window::cameraManager. Currently, there is only one type of built-in camera, the FirstPerson camera (cameras are found in the cameras namespace). The camera manager has arrays of cameras, and the CamID struct keeps track of the type and index of the camera. To add a camera, use CameraManager::addFirstPersonCamera(cameras::PerspectiveData | cameras::OrthographicData). This returns the CamID that references the added camera. To get a pointer to the actual camera (useful for moving the camera or adding callbacks), use cameraManager::getCamera(CamID). This returns a void*, make sure to cast it to the correct camera type before using it. Cameras will automatically resize when the window resizes.
+Currently, there is only one type of built-in camera, the FirstPerson camera (cameras are found in the cameras namespace). The camera manager has arrays of cameras. To add a camera, first construct a camera (such as with the vvision::cameras::FirstPerson constructor), then use CameraManager::addCamera(vvision::camera::Camera* cam). Keep the CamID that is returned, it can be used to manage the camera. To set which camera to render from, call CameraManager::setCamera(CamID).
 
-To make use of a camera, you can change it's rotation and position directly.
-
-Finally, make a loop that contains a glfwPollEvents() and a GraphicsHandler::drawFrame(). The GraphicsHandler object also has a method called window.shouldClose(), which tells you when the x was clicked. It is a good idea to exit the loop when this becomes true.
+Finally, make a loop that contains a glfwPollEvents() and a GraphicsHandler::drawFrame(). The GraphicsHandler::window also has a method called window.shouldClose(), which tells you when the x was clicked. It is a good idea to exit the loop when this becomes true.
 
 
 Next steps:
 Render Systems
-- Index Buffers
 - Uniform Buffers
-- Enable multiple different render systems to be used
 - Textures
 - Offscreen Rendering (Frame Buffers)
 Camera System
@@ -33,6 +25,12 @@ Camera System
 - Follow Camera
 Camera Settings:
 - Viewports
+Interaction:
+- Raycasting
+Assets:
+- Load models from files
+    - .obj
+    - .stl
 
 Credits:
 - GLFW (https://www.glfw.org/)

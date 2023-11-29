@@ -3,7 +3,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 
-#include "model.h"
+#include "gfxObjects/model.h"
 
 namespace vvision{
 
@@ -13,8 +13,8 @@ namespace vvision{
         glm::quat rot;
         glm::vec3 scale;
     public:
-        Model *model;
-        Renderable(Model *model, glm::vec3 pos, glm::quat rot, glm::vec3 scale = {1.0f,1.0f,1.0f});
+        model::Model *model;
+        Renderable(model::Model *model, glm::vec3 pos, glm::quat rot, glm::vec3 scale = {1.0f,1.0f,1.0f});
         ~Renderable();
 
         inline void setPos(glm::vec3 nPos){this->pos = nPos;};

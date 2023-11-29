@@ -3,39 +3,43 @@
 #include "window.h"
 #include "device.h"
 #include "renderer.h"
-#include "model.h" 
-#include "renderable.h"
+#include "gfxObjects/model.h" 
+#include "gfxObjects/renderable.h"
 #include "render_systems/simple.h"
 
 namespace vvision{
     class GraphicsHandler{
-    private:
-        std::filesystem::path shaderPath;
-        std::string vertexName, fragmentName;
     public:
         Window window;
         Device device;
         Renderer renderer;
 
-        render_systems::Simple renderSystem;
-
-        std::vector<Model*> models;
+        std::vector<render_systems::RenderSystem *> renderSystems;
+        std::vector<model::Model*> models;
         std::vector<Renderable> renderables;
 
-        GraphicsHandler(uint32_t width, uint32_t height, std::string title, std::filesystem::path shaderPath, std::string vertexName, std::string fragmentName);
+        GraphicsHandler(uint32_t width, uint32_t height, std::string title);
         ~GraphicsHandler();
 
         GraphicsHandler(const GraphicsHandler&) = delete;
         void operator=(const GraphicsHandler&) = delete;
 
-        Model* addModel(std::vector<Model::Vertex> vertices){
-            Model *m = new Model(this->device, vertices);
+        template<typename R>
+        R* addRenderSystem(std::filesystem::path shaderPath, std::string vertexName, std::string fragmentName, model::vertex::VertexType vertexType){
+            VkExtent2D extent = this->window.getExtent();
+            R* renderSystem = new R(this->device, this->renderer.getSwapChainRenderPass(), extent.width, extent.height, shaderPath, vertexName, fragmentName, vertexType);
+            this->renderSystems.push_back(renderSystem);
+            return renderSystem;
+        }
+        template<typename V>
+        model::Model* addModel(const V *vertices, uint32_t vertexCount, const uint32_t *indices, uint32_t indexCount){
+            model::Model *m = new model::Model(this->device, V::type);
+            m->setVertices(vertices, vertexCount);
+            m->setIndices(indices, indexCount);
+            m->upload<V>();
+            m->clear();
             this->models.push_back(m);
             return m;
-        };
-        Renderable* addRenderable(Model *model, glm::vec3 pos, glm::quat rot, glm::vec3 scale = {1.0f,1.0f,1.0f}){
-            this->renderables.push_back(Renderable(model, pos, rot, scale));
-            return &this->renderables.at(this->renderables.size()-1);
         };
 
         void drawFrame();

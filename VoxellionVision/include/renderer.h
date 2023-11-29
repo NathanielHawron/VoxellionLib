@@ -10,8 +10,6 @@
 namespace vvision{
     class Renderer{
     private:
-        std::filesystem::path shaderPath;
-        std::string vertexName, fragmentName;
         uint32_t currentImageIndex;
         int currentFrameIndex;
         bool isFrameStarted;
@@ -22,7 +20,7 @@ namespace vvision{
         SwapChain *swapChain;
         std::vector<VkCommandBuffer> commandBuffers;
 
-        Renderer(Window &window, Device &device, uint32_t width, uint32_t height, std::string title, std::filesystem::path shaderPath, std::string vertexName, std::string fragmentName);
+        Renderer(Window &window, Device &device, uint32_t width, uint32_t height, std::string title);
         ~Renderer();
 
         Renderer(const Renderer&) = delete;
